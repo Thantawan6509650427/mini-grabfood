@@ -1,7 +1,7 @@
 import { useAuth } from "../contexts/AuthContext";
 import { useState, useRef, useEffect } from "react";
 
-export default function Header() {
+function Header() {
   const { user, loading, login, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -186,3 +186,5 @@ export default function Header() {
     </header>
   );
 }
+
+export default Header;

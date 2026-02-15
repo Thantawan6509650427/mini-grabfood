@@ -28,10 +28,13 @@ export const addRating = async (req, res) => {
       return res.status(404).json({ message: "Restaurant not found" });
     }
 
-    // Insert rating
+    // ⭐ ดึง user_id จาก req.user (ถ้ามี authentication)
+    const userId = req.user ? req.user.id : null;
+
+    // Insert rating พร้อม user_id
     const [result] = await pool.query(
-      "INSERT INTO ratings (restaurant_id, score, comment) VALUES (?, ?, ?)",
-      [id, score, comment || null]
+      "INSERT INTO ratings (user_id, restaurant_id, score, comment) VALUES (?, ?, ?, ?)",
+      [userId, id, score, comment || null]  // ← เพิ่ม userId
     );
 
     // Get updated restaurant stats

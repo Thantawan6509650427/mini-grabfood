@@ -1,32 +1,38 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Mini GrabFood Backend API with Google OAuth",
   "type": "module",
   "main": "src/server.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --coverage",
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:unit": "npm test -- src/tests/*.test.js",
+    "test:integration": "cross-env NODE_ENV=test node --env-file=.env.test --experimental-vm-modules node_modules/jest/bin/jest.js src/tests/integration",
+    "test:watch": "npm test -- --watch",
+    "test:coverage": "npm test -- --coverage",
+    "test:verbose": "npm test -- --verbose"
   },
-  "keywords": [],
+  "keywords": ["api", "express", "oauth", "mysql"],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
-    "express-session": "^1.19.0",
-    "jsonwebtoken": "^9.0.3",
-    "mysql2": "^3.16.2",
+    "express-session": "^1.18.1",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.5",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
-    "cross-env": "^10.1.0",
-    "jest": "^30.2.0",
-    "nodemon": "^3.1.11",
-    "supertest": "^7.2.2"
+    "@jest/globals": "^30.0.0",
+    "cross-env": "^7.0.3",
+    "jest": "^30.0.0",
+    "nodemon": "^3.1.7",
+    "supertest": "^7.0.0"
   }
 }
