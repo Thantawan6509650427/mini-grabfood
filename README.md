@@ -676,9 +676,9 @@ copyright notice and this permission notice appear in all copies.
 
 ## 📞 Contact
 
-- **Email:** your.email@example.com
-- **GitHub:** [@yourusername](https://github.com/yourusername)
-- **LinkedIn:** [Your Name](https://linkedin.com/in/yourprofile)
+- **Email:** tantawanjittsan@gmail.com
+- **GitHub:** [@Thantawan6509650427](https://github.com/Thantawan6509650427)
+- **LinkedIn:** [thantawan chitsan](https://www.linkedin.com/in/thantawan-chitsan/)
 
 ---
 

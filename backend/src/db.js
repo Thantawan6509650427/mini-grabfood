@@ -21,13 +21,15 @@ const dbConfig = {
 const pool = mysql.createPool(dbConfig);
 
 // Test connection on startup
-pool.getConnection()
-  .then(connection => {
-    console.log("✓ Database pool created");
-    connection.release();
-  })
-  .catch(err => {
-    console.error("✗ Database pool creation failed:", err.message);
-  });
+if (process.env.NODE_ENV !== "test") {
+  pool.getConnection()
+    .then(connection => {
+      console.log("✓ Database pool created");
+      connection.release();
+    })
+    .catch(err => {
+      console.error("✗ Database pool creation failed:", err.message);
+    });
+}
 
 export default pool;
