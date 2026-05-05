@@ -660,7 +660,15 @@ copyright notice and this permission notice appear in all copies.
 
 ## 👥 Authors
 
-- **Your Name** - *Initial work* - [YourGitHub](https://github.com/yourusername)
+- **Thantawan Chitsan** - *Full Stack Developer* - [GitHub](https://github.com/Thantawan6509650427)
+
+### 🤖 Development Contributions
+
+- **Claude (GitHub Copilot)** - AI-assisted development using Codex AI
+  - Code generation, refactoring, and optimization
+  - Bug fixing and debugging assistance
+  - Feature implementation and improvements
+  - Documentation and commit messages
 
 ---
 
@@ -670,6 +678,7 @@ copyright notice and this permission notice appear in all copies.
 - Express.js Team สำหรับ backend framework
 - Tailwind CSS Team สำหรับ styling framework
 - MySQL Team สำหรับ database
+- GitHub Copilot (Claude/Codex) สำหรับ AI-assisted development
 - ขอบคุณทุกคนที่ contribute
 
 ---
