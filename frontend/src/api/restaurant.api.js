@@ -9,11 +9,14 @@ async function handleResponse(response) {
   return response.json();
 }
 
-export async function getRestaurants(search = "") {
+export async function getRestaurants(search = "", page = 1, limit = 6) {
   try {
-    const url = search 
-      ? `${API_URL}/restaurants?search=${encodeURIComponent(search)}`
-      : `${API_URL}/restaurants`;
+    const params = new URLSearchParams();
+    if (search) params.append("search", search);
+    params.append("page", page);
+    params.append("limit", limit);
+    
+    const url = `${API_URL}/restaurants${params.toString() ? "?" + params.toString() : ""}`;
     
     const res = await fetch(url);
     return handleResponse(res);

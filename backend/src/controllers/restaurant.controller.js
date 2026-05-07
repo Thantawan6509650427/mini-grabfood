@@ -1,10 +1,14 @@
 import pool from "../db.js";
 
-// Get all restaurants with search and ratings
+// Get all restaurants with search and ratings (with pagination)
 export const getRestaurants = async (req, res) => {
   try {
-    const { search } = req.query;
+    const { search, page = 1, limit = 6 } = req.query;
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 6));
+    const offset = (pageNum - 1) * limitNum;
 
+    let countSql = "SELECT COUNT(DISTINCT r.id) as total FROM restaurants r";
     let sql = `
       SELECT 
         r.id,
@@ -20,16 +24,37 @@ export const getRestaurants = async (req, res) => {
     const params = [];
 
     if (search && search.trim()) {
-      sql += " WHERE r.name LIKE ? OR r.description LIKE ?";
+      const whereClause = " WHERE r.name LIKE ? OR r.description LIKE ?";
+      countSql += whereClause;
+      sql += whereClause;
       const searchPattern = `%${search.trim()}%`;
       params.push(searchPattern, searchPattern);
     }
 
     sql += " GROUP BY r.id, r.name, r.description, r.image_url, r.created_at";
     sql += " ORDER BY avg_rating DESC, r.name ASC";
+    sql += " LIMIT ? OFFSET ?";
 
-    const [rows] = await pool.query(sql, params);
-    res.json(rows);
+    // Get total count
+    const [countResult] = await pool.query(countSql, params.slice(0, search ? 2 : 0));
+    const total = countResult[0].total;
+
+    // Get paginated results
+    const [rows] = await pool.query(sql, [...params, limitNum, offset]);
+    
+    const totalPages = Math.ceil(total / limitNum);
+    
+    res.json({
+      data: rows,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages,
+        hasNextPage: pageNum < totalPages,
+        hasPrevPage: pageNum > 1
+      }
+    });
   } catch (err) {
     console.error("Error fetching restaurants:", err);
     res.status(500).json({ 

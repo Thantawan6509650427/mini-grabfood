@@ -24,6 +24,13 @@ export default function RestaurantList() {
 
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("rating_desc");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
 
   const debouncedSearch = useDebounce(search, 400);
 
@@ -33,8 +40,9 @@ export default function RestaurantList() {
       try {
         setLoading(true);
         setError(null);
-        const data = await getRestaurants();
-        setRestaurants(data);
+        const result = await getRestaurants(debouncedSearch, page, 6);
+        setRestaurants(result.data);
+        setPagination(result.pagination);
       } catch (err) {
         console.error("Fetch error:", err);
         setError("ไม่สามารถโหลดข้อมูลร้านอาหารได้ กรุณาลองใหม่อีกครั้ง");
@@ -44,22 +52,18 @@ export default function RestaurantList() {
     };
 
     fetchRestaurants();
-  }, []);
+  }, [debouncedSearch, page]);
 
-  // Filter and sort restaurants
-  const filteredRestaurants = useMemo(() => {
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  // Sort restaurants (client-side only, search is server-side)
+  const sortedRestaurants = useMemo(() => {
     let result = [...restaurants];
 
-    // Search filter
-    if (debouncedSearch.trim()) {
-      const searchLower = debouncedSearch.toLowerCase();
-      result = result.filter((r) =>
-        r.name.toLowerCase().includes(searchLower) ||
-        r.description?.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Sort by rating
+    // Sort by rating or name
     if (sort === "rating_desc") {
       result.sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0));
     } else if (sort === "rating_asc") {
@@ -69,7 +73,7 @@ export default function RestaurantList() {
     }
 
     return result;
-  }, [restaurants, debouncedSearch, sort]);
+  }, [restaurants, sort]);
 
   // Loading state
   if (loading) {
@@ -139,13 +143,16 @@ export default function RestaurantList() {
 
         {/* Results count */}
         <div className="mt-3 text-sm text-gray-600">
-          พบ {filteredRestaurants.length} ร้าน
+          พบ {pagination.total} ร้านทั้งหมด
           {debouncedSearch && ` จากการค้นหา "${debouncedSearch}"`}
+          {pagination.total > 0 && (
+            <span> • แสดง {sortedRestaurants.length} รายการ (หน้าที่ {page}/{pagination.totalPages})</span>
+          )}
         </div>
       </div>
 
       {/* Empty state */}
-      {filteredRestaurants.length === 0 && (
+      {sortedRestaurants.length === 0 && !loading && (
         <div className="text-center py-20">
           <div className="text-6xl mb-4">🔍</div>
           <p className="text-xl text-gray-700 mb-2">ไม่พบร้านอาหารที่ค้นหา</p>
@@ -162,18 +169,66 @@ export default function RestaurantList() {
       )}
 
       {/* Restaurant grid */}
-      {filteredRestaurants.length > 0 && (
-        <div className="restaurant-container">
-          <div className="restaurant-grid">
-            {filteredRestaurants.map((restaurant) => (
-              <RestaurantCard
-                key={restaurant.id}
-                restaurant={restaurant}
-                onClick={() => navigate(`/restaurants/${restaurant.id}`)}
-              />
-            ))}
+      {sortedRestaurants.length > 0 && (
+        <>
+          <div className="restaurant-container">
+            <div className="restaurant-grid">
+              {sortedRestaurants.map((restaurant) => (
+                <RestaurantCard
+                  key={restaurant.id}
+                  restaurant={restaurant}
+                  onClick={() => navigate(`/restaurants/${restaurant.id}`)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+
+          {/* Pagination controls */}
+          <div className="flex items-center justify-center gap-2 mt-8 mb-6">
+            <button
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={!pagination.hasPrevPage}
+              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+            >
+              ← ก่อนหน้า
+            </button>
+
+            <div className="flex items-center gap-2">
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+                .filter(
+                  (p) =>
+                    p === 1 ||
+                    p === pagination.totalPages ||
+                    (p >= page - 1 && p <= page + 1)
+                )
+                .map((p, idx, arr) => (
+                  <div key={p}>
+                    {idx > 0 && arr[idx - 1] !== p - 1 && (
+                      <span className="text-gray-400">...</span>
+                    )}
+                    <button
+                      onClick={() => setPage(p)}
+                      className={`px-3 py-1 rounded-lg transition ${
+                        p === page
+                          ? "bg-orange-500 text-white font-semibold"
+                          : "bg-white border border-gray-300 text-gray-700 hover:border-orange-500"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  </div>
+                ))}
+            </div>
+
+            <button
+              onClick={() => setPage(Math.min(pagination.totalPages, page + 1))}
+              disabled={!pagination.hasNextPage}
+              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+            >
+              ถัดไป →
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
