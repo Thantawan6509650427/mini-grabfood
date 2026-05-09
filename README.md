@@ -629,18 +629,20 @@ npm run build
 
 ## 📝 TODO / Future Improvements
 
-- [ ] เพิ่มระบบ Authentication (JWT)
-- [ ] เพิ่ม User Profiles
-- [ ] เพิ่มระบบ Upload รูปภาพ
-- [ ] เพิ่ม Menu Management
-- [ ] เพิ่ม Advanced Search & Filters
-- [ ] เพิ่ม Pagination
+- [x] ~~เพิ่มระบบ Authentication (JWT)~~ — Google OAuth + JWT
+- [x] ~~เพิ่ม User Profiles~~ — Profile + ProfileSettings
+- [x] ~~เพิ่มระบบ Upload รูปภาพ~~ — Multer
+- [x] ~~เพิ่ม Pagination~~
+- [ ] เพิ่ม Menu Management (รายการเมนูอาหาร)
+- [ ] เพิ่ม Advanced Search (fuzzy search)
 - [ ] เพิ่ม Rate Limiting
 - [ ] เพิ่ม Unit Tests
 - [ ] เพิ่ม E2E Tests (Cypress)
 - [ ] เพิ่ม CI/CD Pipeline
 - [ ] เพิ่ม Docker Support
 - [ ] เพิ่มภาษาอังกฤษ (i18n)
+- [ ] เพิ่ม Push Notifications
+- [ ] เพิ่ม Map Integration
 
 ---
 
