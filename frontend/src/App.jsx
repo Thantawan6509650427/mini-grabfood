@@ -3,7 +3,10 @@ import { AuthProvider } from "./contexts/AuthContext";
 import RestaurantList from "./components/RestaurantList";
 import RestaurantDetail from "./components/RestaurantDetail";
 import AuthCallback from "./pages/AuthCallback";
+import Profile from "./pages/Profile";
 import Header from "./components/Header";
+import AdminPanel from "./pages/AdminPanel";
+import ProfileSettings from "./pages/ProfileSettings";
 
 function App() {
   return (
@@ -18,7 +21,10 @@ function App() {
             <Routes>
               <Route path="/" element={<RestaurantList />} />
               <Route path="/restaurants/:id" element={<RestaurantDetail />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/profile/settings" element={<ProfileSettings />} />
             </Routes>
           </main>
 

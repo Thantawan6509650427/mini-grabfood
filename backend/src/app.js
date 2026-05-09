@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import passport from "./config/passport.js";
 import restaurantRoutes from "./routes/restaurant.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 const app = express();
 
@@ -12,7 +13,7 @@ const app = express();
 app.use(cors({
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE" , "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
@@ -21,7 +22,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Cookie parser
-app.use(cookieParser());  // ← ตอนนี้ใช้ได้แล้ว
+app.use(cookieParser());
+app.use("/uploads", express.static("uploads"));
 
 // Session configuration
 app.use(
@@ -61,6 +63,7 @@ app.get("/health", (req, res) => {
 // API routes
 app.use("/api", restaurantRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 
 // 404 handler
 app.use((req, res) => {

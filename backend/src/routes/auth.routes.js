@@ -1,9 +1,11 @@
 import express from "express";
 import passport from "passport";
-import { googleCallback, logout, getCurrentUser } from "../controllers/auth.controller.js";
+import multer from "multer";
+import { googleCallback, logout, getCurrentUser, updateProfile } from "../controllers/auth.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
+const upload = multer({ dest: "uploads/profiles/" });
 
 // Google OAuth
 router.get(
@@ -19,6 +21,7 @@ router.get(
 
 // User routes
 router.get("/user", authenticate, getCurrentUser);
+router.put("/user/profile", authenticate, upload.single("picture"), updateProfile);
 router.post("/logout", authenticate, logout);
 
 export default router;

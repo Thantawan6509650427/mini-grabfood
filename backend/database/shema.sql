@@ -1,66 +1,83 @@
--- Mini GrabFood Database Schema (Fixed)
+-- Mini GrabFood Database Schema (PostgreSQL)
+-- Compatible with Supabase and local PostgreSQL
 -- Run this to set up your database
 
--- Create database
-CREATE DATABASE IF NOT EXISTS mini_grabfood CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE mini_grabfood;
-
 -- Drop existing tables in correct order (foreign keys first!)
-DROP TABLE IF EXISTS ratings;
-DROP TABLE IF EXISTS menus;
-DROP TABLE IF EXISTS restaurants;
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS favorites CASCADE;
+DROP TABLE IF EXISTS ratings CASCADE;
+DROP TABLE IF EXISTS menus CASCADE;
+DROP TABLE IF EXISTS restaurants CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
 -- =========================================
 -- 1. Create users table FIRST
 -- =========================================
 CREATE TABLE users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   google_id VARCHAR(255) UNIQUE NOT NULL,
   email VARCHAR(255) NOT NULL,
   name VARCHAR(255),
   picture VARCHAR(512),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_google_id (google_id),
-  INDEX idx_email (email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_users_google_id ON users(google_id);
+CREATE INDEX idx_users_email ON users(email);
 
 -- =========================================
 -- 2. Create restaurants table
 -- =========================================
 CREATE TABLE restaurants (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   description TEXT,
   image_url VARCHAR(512),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_name (name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_restaurants_name ON restaurants(name);
 
 -- =========================================
 -- 3. Create ratings table (with user_id from start)
 -- =========================================
 CREATE TABLE ratings (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NULL,
+  id SERIAL PRIMARY KEY,
+  user_id INT,
   restaurant_id INT NOT NULL,
-  score TINYINT NOT NULL CHECK (score BETWEEN 1 AND 5),
+  score SMALLINT NOT NULL CHECK (score BETWEEN 1 AND 5),
   comment TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
-  FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
-  INDEX idx_user (user_id),
-  INDEX idx_restaurant (restaurant_id),
-  INDEX idx_created (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_ratings_user ON ratings(user_id);
+CREATE INDEX idx_ratings_restaurant ON ratings(restaurant_id);
+CREATE INDEX idx_ratings_created ON ratings(created_at);
 
 -- =========================================
--- 4. Create menus table (optional - for future use)
+-- 4. Create favorites table
+-- =========================================
+CREATE TABLE favorites (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL,
+  restaurant_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, restaurant_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_favorites_user ON favorites(user_id);
+CREATE INDEX idx_favorites_restaurant ON favorites(restaurant_id);
+
+-- =========================================
+-- 5. Create menus table (optional - for future use)
 -- =========================================
 CREATE TABLE menus (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   restaurant_id INT NOT NULL,
   name VARCHAR(255) NOT NULL,
   description TEXT,
@@ -68,14 +85,15 @@ CREATE TABLE menus (
   image_url VARCHAR(512),
   is_available BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
-  INDEX idx_restaurant (restaurant_id),
-  INDEX idx_available (is_available)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_menus_restaurant ON menus(restaurant_id);
+CREATE INDEX idx_menus_available ON menus(is_available);
 
 -- =========================================
--- 5. Insert sample data
+-- 6. Insert sample data
 -- =========================================
 
 -- Insert sample restaurants
@@ -83,6 +101,9 @@ INSERT INTO restaurants (name, description, image_url) VALUES
 ('ครัวป้าแดง', 'อาหารไทยรสจัด เมนูแกงต่างๆ อร่อยถูกปาก', 'https://picsum.photos/seed/rest1/400/300'),
 ('ข้าวมันไก่เจ๊โอ', 'ข้าวมันไก่ตอนเช้า สูตรต้นตำรับ ไก่นุ่ม น้ำจิ้มเด็ด', 'https://picsum.photos/seed/rest2/400/300'),
 ('ส้มตำป้าจ๋า', 'ส้มตำตำสด ปลาร้าแซ่บ ทานคู่กับไก่ย่าง', 'https://picsum.photos/seed/rest3/400/300'),
+('ตั้งฉัตร เต้าหู้ไข่ใส่ไมโครเวฟ', 'เต้าหู้นุ่ม ไข่ใสใหญ่ สำหรับมื้อเช้า ราคาถูก', 'https://picsum.photos/seed/rest4/400/300'),
+('บ้านรสชาติ', 'อาหารจานเดียว ข้าวผัดต่างๆ ราคาเป็นกันเอง', 'https://picsum.photos/seed/rest5/400/300'),
+('ศรีวัฒนา', 'ก๋วยเตี๋ยวเนื้อสด ลูกชิ้น หมูกรอบ นึ่งมาทุกวัน', 'https://picsum.photos/seed/rest6/400/300');
 ('ก๋วยเตี๋ยวเรือลุงเจี๊ยบ', 'ก๋วยเตี๋ยวเรือ น้ำใส น้ำข้น เครื่องแน่น', 'https://picsum.photos/seed/rest4/400/300'),
 ('ข้าวขาหมูนายเล็ก', 'ข้าวขาหมูสูตรตำรับ หมูนุ่ม ไข่พะโล้หอม', 'https://picsum.photos/seed/rest5/400/300'),
 ('ชาบูหมูกระทะร้อน', 'ชาบูบุฟเฟ่ต์ หมู เนื้อ ทะเล ผักสด น้ำจิ้มหลากหลาย', 'https://picsum.photos/seed/rest6/400/300'),
